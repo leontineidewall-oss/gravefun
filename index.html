@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>grave.fun — bury dead bags, get sol back</title>
+<title>grave — bury dead bags, get sol back</title>
 <meta name="description" content="Burn the dead coins in your Solana wallet, close their token accounts and take back the rent they lock. You tick, you sign, the sol comes back to you.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://gravefun.vercel.app/">
-<meta property="og:title" content="grave.fun — bury dead bags, get sol back">
+<meta property="og:url" content="https://gravesol.vercel.app/">
+<meta property="og:title" content="grave — bury dead bags, get sol back">
 <meta property="og:description" content="Every dead coin in your wallet locks ~0.002 sol of rent. Burn it, close it, take it back.">
-<meta property="og:image" content="https://gravefun.vercel.app/api/og">
+<meta property="og:image" content="https://gravesol.vercel.app/api/og">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="grave.fun — bury dead bags, get sol back">
+<meta name="twitter:title" content="grave — bury dead bags, get sol back">
 <meta name="twitter:description" content="Every dead coin in your wallet locks ~0.002 sol of rent. Burn it, close it, take it back.">
-<meta name="twitter:image" content="https://gravefun.vercel.app/api/og">
+<meta name="twitter:image" content="https://gravesol.vercel.app/api/og">
 <meta name="theme-color" content="#150f2b">
 <link rel="icon" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -246,7 +246,7 @@ dialog h3{margin:0 0 12px}
 </main>
 
 <footer><div class="wrap">
-  <span>grave.fun · burning is permanent · not financial advice</span>
+  <span>grave · burning is permanent · not financial advice</span>
   <span><a href="https://github.com/leontineidewall-oss/gravefun" target="_blank" rel="noopener">code</a></span>
 </div></footer>
 
@@ -258,7 +258,7 @@ dialog h3{margin:0 0 12px}
 </dialog>
 
 <script>
-// grave.fun pixel engine: one source for the page canvas, the share card and /api/og
+// grave pixel engine: one source for the page canvas, the share card and /api/og
 // (inlined into index.html by build.py; required by api/og.js in node)
 (function (root) {
   var PAL = {
@@ -533,7 +533,7 @@ dialog h3{margin:0 0 12px}
 
 </script>
 <script>
-// grave.fun core: base58, legacy transaction compile/serialize, spl burn + close batches, coin classification
+// grave core: base58, legacy transaction compile/serialize, spl burn + close batches, coin classification
 (function (root) {
   var B58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
   var SYS = "11111111111111111111111111111111";
@@ -714,10 +714,10 @@ dialog h3{margin:0 0 12px}
 
 </script>
 <script>
-// grave.fun app: scan, classify, draw the graveyard, bury through the wallet, share
+// grave app: scan, classify, draw the graveyard, bury through the wallet, share
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var SITE = "https://gravefun.vercel.app";
+  var SITE = "https://gravesol.vercel.app";
   var CHAIN = "solana:mainnet";
   var DUMMY_BH = "11111111111111111111111111111111";
   var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1185,7 +1185,7 @@ dialog h3{margin:0 0 12px}
       { segs: [["i buried", "ink"]], sc: 2 },
       { segs: [[String(r.n), "c"], [r.n === 1 ? " coin" : " coins", "ink"]], sc: 2 },
       { segs: [["+" + sol(r.net) + " sol back", "ink"]], sc: 2, gap: 12 },
-      { segs: [["grave.fun", "c"]], sc: 1 }
+      { segs: [["grave", "c"]], sc: 1 }
     ], { top: 14, hero: syms[0] || "", stones: [[syms[0] || "", syms[0] ? "on" : "blank"], [syms[1] || "", syms[1] ? "buried" : "blank"], [syms[2] || "", syms[2] ? "buried" : "blank"]] });
     return g;
   }

@@ -1,4 +1,4 @@
-# grave.fun
+# grave
 
 Bury dead bags, get sol back. Connect a Solana wallet (or peek at any address), see every dead coin as a tombstone, burn them and close their token accounts. Each closed account returns its rent (usually 0.00203928 sol) to your wallet.
 
