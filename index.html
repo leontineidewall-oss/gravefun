@@ -1,0 +1,1233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>grave.fun — bury dead bags, get sol back</title>
+<meta name="description" content="Burn the dead coins in your Solana wallet, close their token accounts and take back the rent they lock. You tick, you sign, the sol comes back to you.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://gravefun.vercel.app/">
+<meta property="og:title" content="grave.fun — bury dead bags, get sol back">
+<meta property="og:description" content="Every dead coin in your wallet locks ~0.002 sol of rent. Burn it, close it, take it back.">
+<meta property="og:image" content="https://gravefun.vercel.app/api/og">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="grave.fun — bury dead bags, get sol back">
+<meta name="twitter:description" content="Every dead coin in your wallet locks ~0.002 sol of rent. Burn it, close it, take it back.">
+<meta name="twitter:image" content="https://gravefun.vercel.app/api/og">
+<meta name="theme-color" content="#150f2b">
+<link rel="icon" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#150f2b;--bg2:#1c1538;--card:#211a40;--line:#3a2f66;--ink:#f7f5ff;--mut:#b9b0e0;--dim:#8a80b8;--gold:#ffd34d;--goldD:#c9861c;--pink:#ff9fc4;--ok:#7be0a8;--bad:#ff8a8a;
+--sans:"Inter Tight","Noto Sans","Liberation Sans",system-ui,sans-serif;--mono:"JetBrains Mono","DejaVu Sans Mono","Liberation Mono",monospace}
+*{box-sizing:border-box}
+html{overflow-x:hidden;scroll-behavior:smooth;background:var(--bg)}
+body{margin:0;overflow-x:clip;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button,input{font:inherit;color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding-left:24px;padding-right:24px}
+.mono{font-family:var(--mono)}
+.px{image-rendering:pixelated;image-rendering:crisp-edges}
+/* nav */
+nav{position:sticky;top:0;z-index:20;background:rgba(21,15,43,.86);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:2px solid #241b4a}
+nav .wrap{display:flex;align-items:center;gap:18px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:21px;letter-spacing:-.02em;text-decoration:none}
+.brand canvas{width:30px;height:30px}
+.navlinks{display:flex;gap:18px;margin-left:auto;font-size:15px;color:var(--mut)}
+.navlinks a{text-decoration:none}.navlinks a:hover{color:var(--ink)}
+.chip{font:600 13px var(--mono);padding:6px 10px;border:2px solid var(--line);color:var(--mut);white-space:nowrap;background:none;cursor:pointer}
+.chip b{color:var(--gold);font-weight:700}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;cursor:pointer;font-weight:700;font-size:16px;padding:12px 20px;background:var(--gold);color:#1b1433;box-shadow:0 4px 0 var(--goldD);transition:transform .08s}
+.btn:hover{transform:translateY(-1px)}.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--goldD)}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+.btn.alt{background:#2b2252;color:var(--ink);box-shadow:0 4px 0 #120d26}
+.btn.sm{font-size:14px;padding:8px 14px}
+/* hero */
+.hero{padding-top:56px;padding-bottom:18px}
+.hero h1{margin:0;font-weight:900;font-size:clamp(48px,8.4vw,104px);line-height:.95;letter-spacing:-.045em;text-shadow:0 6px 0 #0e0a1d}
+.hero h1 em{font-style:normal;color:var(--gold)}
+.hero p.lede{margin:20px 0 0;max-width:600px;font-size:20px;color:var(--mut)}
+.actions{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:28px}
+.peek{display:flex;flex:1 1 360px;max-width:520px;border:2px solid var(--line);background:#120d26}
+.peek input{flex:1;min-width:0;border:0;background:none;padding:11px 12px;font:500 14px var(--mono);outline:none}
+.peek input::placeholder{color:var(--dim)}
+.peek button{border:0;border-left:2px solid var(--line);background:#241b4a;padding:0 16px;font-weight:700;cursor:pointer}
+.err{min-height:24px;margin-top:10px;font:500 14px var(--mono);color:var(--bad)}
+.note{margin-top:4px;font-size:14px;color:var(--dim)}
+/* stage */
+.stage{position:relative;margin-top:18px;border:2px solid #241b4a;background:#150f2b}
+.stage canvas{display:block;width:100%;height:auto;cursor:default}
+.sign{position:absolute;right:2.2%;top:7%;background:#7a5434;border:3px solid #0e0a1d;box-shadow:inset 0 -6px 0 #4b311f,inset 0 4px 0 #9c7148;padding:10px 16px 12px;text-align:center;min-width:170px;font-family:var(--mono)}
+.sign .k{font-size:11px;letter-spacing:.2em;color:#f3d9b0}
+.sign .n{font-size:15px;font-weight:700;color:#fff1d6}
+.sign .v{font-size:23px;font-weight:700;color:var(--gold);letter-spacing:-.02em;line-height:1.15}
+.tip{position:absolute;z-index:5;pointer-events:none;background:#0e0a1d;border:2px solid var(--gold);padding:10px 12px;font:500 13px/1.45 var(--mono);color:var(--mut);max-width:250px;opacity:0;transition:opacity .1s}
+.tip.on{opacity:1}
+.tip b{display:block;color:var(--ink);font-size:15px}
+.tip i{font-style:normal;color:var(--gold)}
+.status{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 16px;padding:10px 14px;border:2px solid #241b4a;border-top:0;font:500 13px var(--mono);color:var(--dim);background:#120d26}
+.status b{color:var(--mut)}
+/* review */
+.panel{margin-top:28px;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+.list{border:2px solid #241b4a;background:var(--bg2)}
+.grp{border-bottom:2px solid #241b4a}
+.grp:last-child{border-bottom:0}
+.gh{display:flex;align-items:center;gap:10px;padding:12px 14px;font-weight:700;background:#1a1335;cursor:pointer;user-select:none}
+.gh .c{margin-left:auto;font:500 13px var(--mono);color:var(--dim)}
+.gh input,.row input{width:18px;height:18px;accent-color:var(--gold);margin:0}
+.gd{font:500 13px var(--mono);color:var(--dim);padding:0 14px 10px;background:#1a1335}
+.row{display:grid;grid-template-columns:22px minmax(0,1fr) minmax(0,1.5fr) 80px;gap:10px;align-items:center;padding:9px 14px;border-top:1px solid #241b4a;font-size:15px}
+.row:hover{background:#221a45}
+.row .t{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .t a{text-decoration:none}.row .t a:hover{color:var(--gold)}
+.row .m{font:500 12px var(--mono);color:var(--dim);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .why{font:500 13px var(--mono);color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .r{font:600 13px var(--mono);text-align:right;color:var(--mut)}
+.row.off{opacity:.5}
+.row.done .r{color:var(--ok)}
+.more{display:block;width:100%;border:0;background:none;padding:10px;color:var(--mut);font:600 13px var(--mono);cursor:pointer;border-top:1px solid #241b4a}
+.sum{position:sticky;top:84px;border:2px solid var(--line);background:var(--card);padding:18px}
+.sum h3{margin:0 0 12px;font-size:18px}
+.line{display:flex;justify-content:space-between;gap:12px;font:500 14px var(--mono);color:var(--mut);padding:5px 0}
+.line b{color:var(--ink);font-weight:700}
+.line.fee b{color:var(--pink)}
+.line.tot{border-top:2px dashed var(--line);margin-top:6px;padding-top:12px;font-size:16px}
+.line.tot b{color:var(--gold);font-size:19px}
+.sum .btn{width:100%;margin-top:14px}
+.sum .small{font-size:13px;color:var(--dim);margin-top:10px}
+.log{margin-top:14px;font:500 13px var(--mono);color:var(--mut);max-height:240px;overflow:auto}
+.log div{padding:3px 0;border-top:1px solid #2a2150}
+.log .ok{color:var(--ok)}.log .bad{color:var(--bad)}
+.log a{color:var(--gold)}
+/* result */
+.result{margin-top:28px;border:2px solid var(--gold);background:var(--card);padding:22px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:center}
+.result h2{margin:0;font-size:clamp(28px,4vw,44px);line-height:1;letter-spacing:-.03em}
+.result h2 em{font-style:normal;color:var(--gold)}
+.result p{color:var(--mut);margin:12px 0 18px}
+.result canvas{width:100%;height:auto;border:2px solid #0e0a1d}
+.result .actions{margin-top:0}
+/* rules + cannot */
+section.sec{padding-top:72px}
+.sec h2{font-size:clamp(30px,4.4vw,48px);line-height:1;letter-spacing:-.035em;margin:0 0 24px}
+.sec h2 span{color:var(--dim);font:600 15px var(--mono);letter-spacing:0;display:block;margin-bottom:10px}
+.rules{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.rule{border:2px solid #241b4a;background:var(--bg2);padding:18px}
+.rule .k{font:700 13px var(--mono);color:var(--gold);letter-spacing:.06em}
+.rule h3{margin:8px 0 6px;font-size:20px;letter-spacing:-.02em;line-height:1.15}
+.rule p{margin:0;color:var(--mut);font-size:15px}
+table.cannot{width:100%;border-collapse:collapse;font-size:16px}
+.cannot th{text-align:left;font:600 13px var(--mono);color:var(--dim);padding:0 12px 10px 0;border-bottom:2px solid #241b4a}
+.cannot td{padding:14px 12px 14px 0;border-bottom:1px solid #241b4a;vertical-align:top;color:var(--mut)}
+.cannot td:first-child{color:var(--ink);font-weight:700;width:44%}
+footer{margin-top:80px;border-top:2px solid #241b4a;padding-top:22px;padding-bottom:40px;font:500 13px var(--mono);color:var(--dim)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between}
+/* wallet dialog */
+dialog{border:2px solid var(--gold);background:#120d26;color:var(--ink);padding:20px;width:min(380px,calc(100vw - 32px))}
+dialog::backdrop{background:rgba(8,5,18,.7)}
+dialog h3{margin:0 0 12px}
+.wl{display:grid;gap:8px}
+.wl button{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;border:2px solid var(--line);background:#1a1335;cursor:pointer;font-weight:700;text-align:left}
+.wl button:hover{border-color:var(--gold)}
+.wl img{width:28px;height:28px}
+.hidden{display:none!important}
+@media (max-width:900px){
+  .panel{grid-template-columns:minmax(0,1fr)}
+  .sum{position:static;order:-1}
+  .rules{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .result{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:620px){
+  body{font-size:16px}
+  .wrap{padding-left:16px;padding-right:16px}
+  .navlinks{display:none}
+  nav .wrap{gap:10px}
+  #navGrave{margin-left:auto}
+  .hero{padding-top:32px}
+  .hero p.lede{font-size:17px}
+  .actions .btn{flex:1 1 100%}
+  .peek{flex-basis:100%}
+  .sign{position:static;border-width:0 0 3px;min-width:0;display:flex;align-items:baseline;justify-content:center;gap:10px;flex-wrap:wrap}
+  .row{grid-template-columns:22px minmax(0,1fr) 76px}
+  .row .why{grid-column:2/4;grid-row:2}
+  .rules{grid-template-columns:minmax(0,1fr)}
+  .cannot td:first-child{width:50%}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <a class="brand" href="#top"><canvas id="mark" width="20" height="25" class="px" aria-hidden="true"></canvas>grave</a>
+  <div class="navlinks"><a href="#rules">rules</a><a href="#cannot">limits</a></div>
+  <button class="chip" id="navGrave" type="button" title="$GRAVE contract address"><b>$GRAVE</b> <span id="graveCa">not launched</span></button>
+  <button class="btn sm" id="navConnect" type="button">connect</button>
+</div></nav>
+
+<main id="top">
+<header class="hero wrap">
+  <h1>bury dead bags.<br>get <em>sol</em> back.</h1>
+  <p class="lede">Every dead coin in your wallet locks about 0.002 sol of rent. Burn it, close the account, and the sol comes back to you.</p>
+  <div class="actions">
+    <button class="btn" id="connect" type="button">connect wallet</button>
+    <form class="peek" id="peek" autocomplete="off">
+      <input id="peekIn" name="w" spellcheck="false" placeholder="or peek at any wallet address" aria-label="wallet address to peek at">
+      <button type="submit">peek</button>
+    </form>
+  </div>
+  <div class="err" id="err" role="status"></div>
+
+  <div class="stage" id="stage">
+    <canvas id="yard" class="px" width="340" height="120" aria-label="your graveyard"></canvas>
+    <div class="sign" id="sign"><div class="k">GRAVEYARD</div><div class="n" id="signN">connect or peek</div><div class="v" id="signV">to dig</div></div>
+    <div class="tip" id="tip"></div>
+  </div>
+  <div class="status" id="status"><span id="stLeft">nothing scanned yet</span><span id="stRight">rent is read from chain · markets from dexscreener</span></div>
+</header>
+
+<div class="wrap hidden" id="review">
+  <div class="panel">
+    <div class="list" id="list"></div>
+    <aside class="sum" id="sum">
+      <h3 id="sumTitle">bury the ticked coins</h3>
+      <div class="line"><span>coins ticked</span><b id="sCount">0</b></div>
+      <div class="line"><span>rent reclaimed</span><b id="sRent">0 sol</b></div>
+      <div class="line fee"><span id="sFeeL">15% to $GRAVE</span><b id="sFee">0 sol</b></div>
+      <div class="line"><span>network fees</span><b id="sNet">0 sol</b></div>
+      <div class="line tot"><span>to your wallet</span><b id="sYou">0 sol</b></div>
+      <button class="btn" id="bury" type="button" disabled>bury</button>
+      <button class="btn alt hidden" id="dry" type="button">dry run (simulate only)</button>
+      <div class="small" id="sumNote">Burning is permanent. Each batch is one transaction: if it fails, nothing in it was burned.</div>
+      <div class="log" id="log"></div>
+    </aside>
+  </div>
+</div>
+
+<div class="wrap hidden" id="result">
+  <div class="result">
+    <div>
+      <h2 id="resH">i buried <em>0 coins</em></h2>
+      <p id="resP"></p>
+      <div class="actions">
+        <button class="btn" id="dl" type="button">save image</button>
+        <a class="btn alt" id="post" href="#" target="_blank" rel="noopener">post on x</a>
+      </div>
+    </div>
+    <canvas id="share" class="px" width="240" height="126" aria-label="share card"></canvas>
+  </div>
+</div>
+
+<section class="sec wrap" id="rules">
+  <h2><span>01 / RULES</span>you tick, you sign, you get the sol.</h2>
+  <div class="rules">
+    <div class="rule"><div class="k">01 · TICK</div><h3>only what you choose</h3><p>Dead and empty coins come pre-ticked. Dust is listed but unticked. Coins that still trade can't be ticked at all.</p></div>
+    <div class="rule"><div class="k">02 · SIGN</div><h3>one approval, every batch</h3><p>Up to 10 coins per transaction. Each is simulated first; your wallet shows exactly what it does before you sign.</p></div>
+    <div class="rule"><div class="k">03 · RENT</div><h3>sol back to you</h3><p>Closing an account returns its rent, usually 0.00203928 sol, to your own wallet. <span id="feeRule">The 15% $GRAVE fee is off until $GRAVE launches.</span></p></div>
+    <div class="rule"><div class="k">04 · NEVER</div><h3>what stays out</h3><p>Wrapped sol, usdc, usdt, nfts and 0-decimal tokens, frozen accounts, and anything still worth $1 or more.</p></div>
+  </div>
+</section>
+
+<section class="sec wrap" id="cannot">
+  <h2><span>02 / LIMITS</span>what it can't do, and so what it does.</h2>
+  <table class="cannot">
+    <thead><tr><th>it cannot</th><th>so it</th></tr></thead>
+    <tbody>
+      <tr><td>bring a dead coin back</td><td>burns the tokens for good. Read the list before you sign.</td></tr>
+      <tr><td>know a coin is dead for sure</td><td>calls it dead when dexscreener shows no market, no trades in 24h, or under $50 liquidity, and shows you why on every row.</td></tr>
+      <tr><td>touch your wallet without you</td><td>builds the transaction in your browser and asks your wallet to sign it. No keys, no approvals, no allowances.</td></tr>
+      <tr><td>sign for a wallet you only peek at</td><td>lets you peek at any address read-only and dry-run its burial on chain. Only the owner can sign.</td></tr>
+      <tr><td>keep a global count yet</td><td>shows your own graveyard, built from the chain each time you load it.</td></tr>
+    </tbody>
+  </table>
+</section>
+</main>
+
+<footer><div class="wrap">
+  <span>grave.fun · burning is permanent · not financial advice</span>
+  <span><a href="https://github.com/leontineidewall-oss/gravefun" target="_blank" rel="noopener">code</a></span>
+</div></footer>
+
+<dialog id="wdlg">
+  <h3>pick a wallet</h3>
+  <div class="wl" id="wl"></div>
+  <p class="note" id="wnone">No Solana wallet found in this browser. Install Phantom, Solflare or Backpack, then reload.</p>
+  <form method="dialog"><button class="btn alt sm" style="margin-top:12px">close</button></form>
+</dialog>
+
+<script>
+// grave.fun pixel engine: one source for the page canvas, the share card and /api/og
+// (inlined into index.html by build.py; required by api/og.js in node)
+(function (root) {
+  var PAL = {
+    sky0: 0x150f2b, sky1: 0x22184a, sky2: 0x33266a, sky3: 0x463686,
+    star: 0xffffff, star2: 0xb9a8ff, moon: 0xf6eed4, moonS: 0xddd2b0, moonG: 0x4c3d8c,
+    hill: 0x1d1540, fence: 0x120d26, ground: 0x0e0a1d, grass: 0x1f4a3c, grassH: 0x2f7a5c,
+    st: 0xbdb6d0, stD: 0x635c80, stM: 0x958eae, ol: 0x0e0a1d, carve: 0x3a3354, carveH: 0xe2ddf0,
+    dim: 0x6f6890, dimD: 0x433d5c, hl: 0xffd34d,
+    gw: 0xf7f5ff, gs: 0xcbc2f2, gol: 0x1b1433, eye: 0x120d22, cheek: 0xff9fc4,
+    c: 0xffd34d, cL: 0xfff1a8, cD: 0xc9861c, cO: 0x5a3510,
+    ink: 0xf7f5ff, lav: 0xb9b0e0, flower: 0xff9fc4, leaf: 0x2f7a5c
+  };
+  var BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
+
+  function rng(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      var t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function Grid(w, h) { this.w = w; this.h = h; this.px = new Int32Array(w * h).fill(PAL.sky0); }
+  Grid.prototype.set = function (x, y, c) {
+    x = Math.round(x); y = Math.round(y);
+    if (x < 0 || y < 0 || x >= this.w || y >= this.h || c == null) return;
+    this.px[y * this.w + x] = typeof c === "string" ? PAL[c] : c;
+  };
+  Grid.prototype.rect = function (x, y, w, h, c) {
+    for (var j = 0; j < h; j++) for (var i = 0; i < w; i++) this.set(x + i, y + j, c);
+  };
+  Grid.prototype.sprite = function (rows, x0, y0, map, skip) {
+    for (var j = 0; j < rows.length; j++) for (var i = 0; i < rows[j].length; i++) {
+      var ch = rows[j][i];
+      if (map[ch] == null) continue;
+      if (skip && skip(i, j)) continue;
+      this.set(x0 + i, y0 + j, map[ch]);
+    }
+  };
+  Grid.prototype.rgba = function (out) {
+    for (var i = 0; i < this.px.length; i++) {
+      var c = this.px[i];
+      if (c < 0) { out[i * 4 + 3] = 0; continue; }
+      out[i * 4] = (c >> 16) & 255; out[i * 4 + 1] = (c >> 8) & 255; out[i * 4 + 2] = c & 255; out[i * 4 + 3] = 255;
+    }
+    return out;
+  };
+
+  function sky(g, horizon) {
+    var cols = ["sky0", "sky1", "sky2", "sky3"], n = cols.length - 1;
+    for (var y = 0; y < g.h; y++) {
+      var t = Math.min(1, y / horizon) * n, k = Math.min(Math.floor(t), n - 1), f = t - k;
+      for (var x = 0; x < g.w; x++) g.set(x, y, f * 16 > BAYER[y % 4][x % 4] ? cols[k + 1] : cols[k]);
+    }
+  }
+
+  function stars(g, n, ymax, seed, avoid) {
+    var r = rng(seed);
+    for (var i = 0; i < n; i++) {
+      var x = Math.floor(r() * g.w), y = Math.floor(r() * ymax), big = r() < 0.14, white = r() < 0.6;
+      if (avoid && avoid(x, y)) continue;
+      if (big) { g.set(x, y, "star"); g.set(x + 1, y, "star2"); g.set(x - 1, y, "star2"); g.set(x, y + 1, "star2"); g.set(x, y - 1, "star2"); }
+      else g.set(x, y, white ? "star" : "star2");
+    }
+  }
+
+  function moon(g, cx, cy, r) {
+    for (var y = cy - r - 3; y <= cy + r + 3; y++) for (var x = cx - r - 3; x <= cx + r + 3; x++) {
+      var d = Math.hypot(x - cx, y - cy);
+      if (d <= r) g.set(x, y, Math.hypot(x - cx + r * 0.35, y - cy + r * 0.35) > r * 1.05 ? "moonS" : "moon");
+      else if (d <= r + 2.2 && BAYER[((y % 4) + 4) % 4][((x % 4) + 4) % 4] < 7) g.set(x, y, "moonG");
+    }
+    [[0.3, -0.25, 0.22], [-0.35, 0.3, 0.16], [0.05, 0.45, 0.11]].forEach(function (k) {
+      for (var y = cy - r; y <= cy + r; y++) for (var x = cx - r; x <= cx + r; x++)
+        if (Math.hypot(x - (cx + k[0] * r), y - (cy + k[1] * r)) <= k[2] * r) g.set(x, y, "moonS");
+    });
+  }
+
+  function hills(g, base, seed) {
+    var p = (seed || 0) * 0.7;
+    for (var x = 0; x < g.w; x++) {
+      var top = base + Math.round(2.5 * Math.sin(x / 17 + p) + 1.5 * Math.sin(x / 6.3 + p));
+      for (var y = top; y < g.h; y++) g.set(x, y, "hill");
+    }
+  }
+
+  function fence(g, x0, x1, y) {
+    for (var x = x0; x < x1; x++) {
+      if (x % 6 === 0) { for (var j = -1; j < 10; j++) g.set(x, y + j, "fence"); }
+      g.set(x, y + 2, "fence"); g.set(x, y + 6, "fence");
+    }
+  }
+
+  function ground(g, y0, seed) {
+    var r = rng(seed || 5);
+    for (var x = 0; x < g.w; x++) {
+      var top = y0 + (r() < 0.3 ? 1 : 0);
+      for (var y = top; y < g.h; y++) g.set(x, y, "ground");
+      g.set(x, top, r() < 0.45 ? "grassH" : "grass");
+      if (r() < 0.22) g.set(x, top - 1, "grass");
+      if (r() < 0.06) g.set(x, top - 2, "grass");
+    }
+  }
+
+  // 3x5 pixel font (rows joined, 15 cells per glyph)
+  var F3 = {
+    "A": ".#.#.#####.##.#",
+    "B": "##.#.###.#.###.",
+    "C": ".###..#..#...##",
+    "D": "##.#.##.##.###.",
+    "E": "####..##.#..###",
+    "F": "####..##.#..#..",
+    "G": ".###..#.##.#.##",
+    "H": "#.##.#####.##.#",
+    "I": "###.#..#..#.###",
+    "J": "..#..#..##.#.#.",
+    "K": "#.##.###.#.##.#",
+    "L": "#..#..#..#..###",
+    "M": "#.########.##.#",
+    "N": "##.#.##.##.##.#",
+    "O": ".#.#.##.##.#.#.",
+    "P": "##.#.###.#..#..",
+    "Q": ".#.#.##.###..##",
+    "R": "##.#.###.#.##.#",
+    "S": ".###...#...###.",
+    "T": "###.#..#..#..#.",
+    "U": "#.##.##.##.####",
+    "V": "#.##.##.##.#.#.",
+    "W": "#.##.########.#",
+    "X": "#.##.#.#.#.##.#",
+    "Y": "#.##.#.#..#..#.",
+    "Z": "###..#.#.#..###",
+    "0": "####.##.##.####",
+    "1": ".#.##..#..#.###",
+    "2": "##...#.#.#..###",
+    "3": "##...#.#...###.",
+    "4": "#.##.####..#..#",
+    "5": "####..##...###.",
+    "6": ".###..####.####",
+    "7": "###..#.#..#..#.",
+    "8": "####.#####.####",
+    "9": "####.####..###.",
+    "$": ".####..#..####.",
+    "?": "##...#.#.....#.",
+    "+": "....#.###.#....",
+    ".": ".............#.",
+    "-": "......###......",
+    ":": "....#.....#....",
+    "!": ".#..#..#.....#.",
+    "/": "..#..#.#.#..#..",
+    " ": "...............",
+    ",": "..........#.#..",
+    "%": "#.#..#.#.#..#.#"
+  };
+
+  function textW(s, sc) { return s.length * 4 * sc - sc; }
+  function text(g, s, x, y, sc, col, shadow) {
+    s = String(s).toUpperCase(); sc = sc || 1;
+    for (var n = 0; n < s.length; n++) {
+      var gl = F3[s[n]] || F3["?"];
+      for (var j = 0; j < 5; j++) for (var i = 0; i < 3; i++) if (gl[j * 3 + i] === "#") {
+        if (shadow) g.rect(x + (n * 4 + i) * sc + sc, y + j * sc + sc, sc, sc, shadow);
+      }
+      for (var j2 = 0; j2 < 5; j2++) for (var i2 = 0; i2 < 3; i2++) if (gl[j2 * 3 + i2] === "#") g.rect(x + (n * 4 + i2) * sc, y + j2 * sc, sc, sc, col);
+    }
+  }
+
+  // ghost mascot hugging a coin (20 x 25); bob shifts the tail wave
+  var GHOST_CACHE = {};
+  function ghostRows(bob) {
+    var key = Math.round(bob * 4) % 25;
+    if (GHOST_CACHE[key]) return GHOST_CACHE[key];
+    var w = 20, h = 25, cx = (w - 1) / 2, cy = 9, r = 9.2, x, y, g = [];
+    for (y = 0; y < h; y++) { g.push([]); for (x = 0; x < w; x++) g[y].push("."); }
+    function body(x, y) {
+      if (Math.hypot(x - cx, y - cy) <= r) return true;
+      if (y >= cy && x >= 0.5 && x <= w - 1.5) return y <= h - 3 + Math.round(1.4 * Math.sin((x / (w - 1)) * Math.PI * 3 + key / 4));
+      return false;
+    }
+    for (y = 0; y < h; y++) for (x = 0; x < w; x++) if (body(x, y)) g[y][x] = "w";
+    for (y = 0; y < h; y++) for (x = 0; x < w; x++) if (g[y][x] === ".") {
+      var nb = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(function (d) { var a = x + d[0], b = y + d[1]; return a >= 0 && b >= 0 && a < w && b < h && g[b][a] === "w"; });
+      if (nb) g[y][x] = "o";
+    }
+    for (y = 0; y < h; y++) for (x = 0; x < w; x++) if (g[y][x] === "w" && (x > cx + 4.5 || (y > 2 && x + 1 < w && g[y][x + 1] === "o" && x > cx) || (y + 1 < h && g[y + 1][x] === "o" && y > cy))) g[y][x] = "s";
+    [6, 12].forEach(function (ex) { for (var yy = 7; yy < 10; yy++) { g[yy][ex] = "e"; g[yy][ex + 1] = "e"; } g[7][ex] = "h"; });
+    g[11][4] = "c"; g[11][5] = "c"; g[11][15] = "c"; g[11][14] = "c"; g[11][9] = "e"; g[11][10] = "e";
+    var ccx = 9.5, ccy = 17.6, cr = 4.6;
+    for (y = 0; y < h; y++) for (x = 0; x < w; x++) {
+      var d = Math.hypot(x - ccx, y - ccy);
+      if (d <= cr + 0.9 && d > cr - 0.1) g[y][x] = "O";
+      else if (d <= cr - 0.1) g[y][x] = (x - ccx) + (y - ccy) < -2.2 ? "L" : ((x - ccx) + (y - ccy) > 2.4 ? "D" : "C");
+    }
+    [16, 17, 18, 19].forEach(function (yy) { g[yy][9] = "D"; }); g[15][10] = "L";
+    [[4, 15], [4, 16], [4, 17], [5, 18], [15, 15], [15, 16], [15, 17], [14, 18]].forEach(function (p) { g[p[1]][p[0]] = "s"; });
+    return (GHOST_CACHE[key] = g.map(function (row) { return row.join(""); }));
+  }
+  var GMAP = { o: "gol", w: "gw", s: "gs", e: "eye", h: "gw", c: "cheek", C: "c", L: "cL", D: "cD", O: "cO" };
+  function ghost(g, x, y, bob, fade) {
+    var rows = ghostRows(bob || 0);
+    g.sprite(rows, x, y, GMAP, fade ? function (i, j) { return BAYER[(j + y) & 3][(i + x) & 3] < fade * 16; } : null);
+  }
+
+  var COIN5 = [".OOO.", "OLCCO", "OCCDO", "OCDDO", ".OOO."];
+  var COIN7 = ["..OOO..", ".OLLCO.", "OLCCCDO", "OCCDCDO", "OCCCDDO", ".OCDDO.", "..OOO.."];
+  var CMAP = { O: "cO", L: "cL", C: "c", D: "cD" };
+  function coin(g, x, y, big) { g.sprite(big ? COIN7 : COIN5, x, y, CMAP); }
+
+  function sparkle(g, x, y, c) {
+    g.set(x, y, "cL"); [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) { g.set(x + d[0], y + d[1], c || "c"); });
+  }
+
+  // rounded headstone; label = ticker (<=5 chars), state: "on" | "off" | "buried" | "blank", hover outline
+  function stone(g, x0, yb, w, h, label, state, hover) {
+    var y0 = yb - h, r = w / 2, dim = state === "off" || state === "buried";
+    var face = dim ? "dim" : "st", band = dim ? "dimD" : "stD";
+    for (var y = y0; y < yb; y++) for (var x = x0; x < x0 + w; x++) {
+      var dy = y - (y0 + r), d = Math.hypot(x + 0.5 - (x0 + r), y + 0.5 - (y0 + r));
+      if (dy < 0 && d > r) continue;
+      var edge = x === x0 || x === x0 + w - 1 || (dy < 0 && d > r - 1.1);
+      g.set(x, y, edge ? (hover ? "hl" : "ol") : (x >= x0 + w - 3 ? band : face));
+    }
+    if (state === "blank") { text(g, "RIP", x0 + Math.round((w - 11) / 2), y0 + Math.round(h * 0.45), 1, "carve"); return; }
+    if (label) {
+      var s = String(label).toUpperCase().slice(0, 5), tw = textW(s, 1);
+      var tx = x0 + Math.max(2, Math.round((w - 2 - tw) / 2)), ty = y0 + Math.round(h * 0.42);
+      text(g, s, tx, ty, 1, dim ? "dimD" : "carve");
+    }
+    if (state === "buried") { // flowers at the foot
+      g.set(x0 + 3, yb - 1, "flower"); g.set(x0 + 4, yb - 2, "flower"); g.set(x0 + 5, yb - 1, "flower"); g.set(x0 + 4, yb - 1, "leaf");
+    }
+  }
+
+  function backdrop(g, opts) {
+    opts = opts || {};
+    var hz = opts.horizon || g.h - 20;
+    sky(g, hz);
+    moon(g, opts.moonX || g.w - 30, opts.moonY || 20, opts.moonR || 11);
+    stars(g, Math.round(g.w * g.h / 160), Math.round(hz * 0.8), opts.seed || 21, opts.avoid);
+    hills(g, hz - 8, opts.seed || 0);
+    if (opts.fence !== false) fence(g, opts.fenceX || 0, g.w, hz - 10);
+  }
+
+  // og / share card (240 x 126 cells; x5 = 1200 x 630)
+  function card(g, lines, opts) {
+    opts = opts || {};
+    backdrop(g, { horizon: 108, moonX: 214, moonY: 24, moonR: 12, seed: 33, fenceX: 128,
+      avoid: function (x, y) { return x < 128 && y > 8 && y < 80; } });
+    var stones = opts.stones || [["", "blank"], ["", "blank"], ["", "blank"]];
+    var xs = [138, 196, 222];
+    stones.slice(0, 3).forEach(function (s, i) { stone(g, xs[i], 108, i ? 18 : 30, i ? 18 : 30, s[0], s[1]); });
+    ghost(g, 143, 50, opts.bob || 0);
+    stone(g, 138, 108, 30, 34, opts.hero || "", opts.hero ? "on" : "blank");
+    ground(g, 106, 9);
+    sparkle(g, 168, 44); sparkle(g, 132, 58, "c"); sparkle(g, 205, 70, "c");
+    var y = opts.top || 14;
+    lines.forEach(function (ln) { // ln = { segs: [[text, colour]], sc, gap }
+      var x = 12;
+      ln.segs.forEach(function (sg) { text(g, sg[0], x, y, ln.sc, sg[1] || "ink", "ol"); x += (sg[0].length * 4) * ln.sc; });
+      y += ln.sc * 5 + (ln.gap == null ? ln.sc * 2 + 2 : ln.gap);
+    });
+  }
+
+  var api = { PAL: PAL, Grid: Grid, rng: rng, sky: sky, stars: stars, moon: moon, hills: hills, fence: fence,
+    ground: ground, text: text, textW: textW, ghost: ghost, coin: coin, sparkle: sparkle, stone: stone,
+    backdrop: backdrop, card: card, F3: F3 };
+  if (typeof module !== "undefined" && module.exports) module.exports = api; else root.PX = api;
+})(this);
+
+</script>
+<script>
+// grave.fun core: base58, legacy transaction compile/serialize, spl burn + close batches, coin classification
+(function (root) {
+  var B58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+  var SYS = "11111111111111111111111111111111";
+  var CB = "ComputeBudget111111111111111111111111111111";
+  var TOK = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
+  var T22 = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
+  var WSOL = "So11111111111111111111111111111111111111112";
+  var KEEP = { // never buried: wrapped sol and the big stables
+    "So11111111111111111111111111111111111111112": "wrapped sol",
+    "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "usdc",
+    "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB": "usdt"
+  };
+  var MAX_TX = 1232, MAX_PER_TX = 10, PRIORITY = 25000; // micro-lamports per compute unit
+
+  function b58enc(b) {
+    var d = [], s = "", i, j, c;
+    for (i = 0; i < b.length; i++) {
+      c = b[i];
+      for (j = 0; j < d.length; j++) { c += d[j] * 256; d[j] = c % 58; c = Math.floor(c / 58); }
+      while (c > 0) { d.push(c % 58); c = Math.floor(c / 58); }
+    }
+    for (i = 0; i < b.length && b[i] === 0; i++) s += "1";
+    for (j = d.length - 1; j >= 0; j--) s += B58[d[j]];
+    return s;
+  }
+  function b58dec(s) {
+    var d = [], i, j, c;
+    for (i = 0; i < s.length; i++) {
+      c = B58.indexOf(s[i]);
+      if (c < 0) throw new Error("bad base58");
+      for (j = 0; j < d.length; j++) { c += d[j] * 58; d[j] = c & 255; c >>= 8; }
+      while (c > 0) { d.push(c & 255); c >>= 8; }
+    }
+    for (i = 0; i < s.length && s[i] === "1"; i++) d.push(0);
+    return new Uint8Array(d.reverse());
+  }
+  function isAddr(s) {
+    if (typeof s !== "string" || !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(s)) return false;
+    try { return b58dec(s).length === 32; } catch (e) { return false; }
+  }
+  function u64(v) {
+    v = BigInt(v); var o = new Uint8Array(8);
+    for (var i = 0; i < 8; i++) { o[i] = Number(v & BigInt(255)); v = v >> BigInt(8); }
+    return o;
+  }
+  function u32(v) { var o = new Uint8Array(4); new DataView(o.buffer).setUint32(0, v >>> 0, true); return o; }
+  function cu16(n) { var o = []; for (;;) { var e = n & 0x7f; n >>= 7; if (!n) { o.push(e); break; } o.push(e | 0x80); } return o; }
+  function cat(parts) {
+    var n = 0, i, o, k = 0;
+    for (i = 0; i < parts.length; i++) n += parts[i].length;
+    o = new Uint8Array(n);
+    for (i = 0; i < parts.length; i++) { o.set(parts[i], k); k += parts[i].length; }
+    return o;
+  }
+  function b64(bytes) {
+    if (typeof Buffer !== "undefined") return Buffer.from(bytes).toString("base64");
+    var s = ""; for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+    return btoa(s);
+  }
+
+  // instructions: { programId, keys: [{ pubkey, isSigner, isWritable }], data: Uint8Array }
+  function ixLimit(units) { return { programId: CB, keys: [], data: cat([[2], u32(units)]) }; }
+  function ixPrice(micro) { return { programId: CB, keys: [], data: cat([[3], u64(micro)]) }; }
+  function ixBurn(prog, acct, mint, owner, amount) {
+    return { programId: prog, keys: [{ pubkey: acct, isSigner: false, isWritable: true }, { pubkey: mint, isSigner: false, isWritable: true }, { pubkey: owner, isSigner: true, isWritable: false }], data: cat([[8], u64(amount)]) };
+  }
+  function ixClose(prog, acct, dest, owner) {
+    return { programId: prog, keys: [{ pubkey: acct, isSigner: false, isWritable: true }, { pubkey: dest, isSigner: false, isWritable: true }, { pubkey: owner, isSigner: true, isWritable: false }], data: new Uint8Array([9]) };
+  }
+  function ixTransfer(from, to, lamports) {
+    return { programId: SYS, keys: [{ pubkey: from, isSigner: true, isWritable: true }, { pubkey: to, isSigner: false, isWritable: true }], data: cat([u32(2), u64(lamports)]) };
+  }
+
+  // legacy message: payer first, then signer-writable, signer-readonly, writable, readonly (programs last)
+  function compile(payer, ixs, blockhash) {
+    var meta = {}, order = [];
+    function add(k, s, w) { if (!meta[k]) { meta[k] = { s: false, w: false }; order.push(k); } meta[k].s = meta[k].s || s; meta[k].w = meta[k].w || w; }
+    add(payer, true, true);
+    ixs.forEach(function (ix) { ix.keys.forEach(function (k) { add(k.pubkey, k.isSigner, k.isWritable); }); });
+    ixs.forEach(function (ix) { add(ix.programId, false, false); });
+    var rest = order.slice(1);
+    function grp(s, w) { return rest.filter(function (k) { return meta[k].s === s && meta[k].w === w; }); }
+    var keys = [payer].concat(grp(true, true), grp(true, false), grp(false, true), grp(false, false));
+    var idx = {}; keys.forEach(function (k, i) { idx[k] = i; });
+    var nSig = keys.filter(function (k) { return meta[k].s; }).length;
+    var roSig = keys.filter(function (k) { return meta[k].s && !meta[k].w; }).length;
+    var roUns = keys.filter(function (k) { return !meta[k].s && !meta[k].w; }).length;
+    var parts = [new Uint8Array([nSig, roSig, roUns]), new Uint8Array(cu16(keys.length))];
+    keys.forEach(function (k) { parts.push(b58dec(k)); });
+    parts.push(b58dec(blockhash));
+    parts.push(new Uint8Array(cu16(ixs.length)));
+    ixs.forEach(function (ix) {
+      parts.push(new Uint8Array([idx[ix.programId]]));
+      parts.push(new Uint8Array(cu16(ix.keys.length)));
+      parts.push(new Uint8Array(ix.keys.map(function (k) { return idx[k.pubkey]; })));
+      parts.push(new Uint8Array(cu16(ix.data.length)));
+      parts.push(ix.data);
+    });
+    var msg = cat(parts);
+    return { message: msg, keys: keys, nSig: nSig, tx: cat([new Uint8Array(cu16(nSig)), new Uint8Array(64 * nSig), msg]) };
+  }
+
+  // one batch transaction: compute budget, burn (if any balance) + close per account, then the fee transfer
+  function batchTx(owner, items, fee, blockhash) {
+    var units = 8000, ixs = [], lamports = 0;
+    items.forEach(function (it) {
+      units += (it.amount !== "0" ? 9000 : 4000) + (it.program === T22 ? 6000 : 0);
+      lamports += it.lamports;
+    });
+    var feeLamports = fee && fee.wallet && fee.bps ? Math.floor(lamports * fee.bps / 10000) : 0;
+    if (feeLamports) units += 300;
+    ixs.push(ixLimit(Math.min(1400000, units)), ixPrice(PRIORITY));
+    items.forEach(function (it) {
+      if (it.amount !== "0") ixs.push(ixBurn(it.program, it.pubkey, it.mint, owner, it.amount));
+      ixs.push(ixClose(it.program, it.pubkey, owner, owner));
+    });
+    if (feeLamports) ixs.push(ixTransfer(owner, fee.wallet, feeLamports));
+    var c = compile(owner, ixs, blockhash);
+    return { items: items, bytes: c.tx, size: c.tx.length, lamports: lamports, fee: feeLamports, units: Math.min(1400000, units), priority: Math.ceil(Math.min(1400000, units) * PRIORITY / 1e6) };
+  }
+
+  // greedy: pack accounts until the next one would break the 1232-byte limit or 10 accounts
+  function batches(owner, items, fee, blockhash) {
+    var out = [], cur = [];
+    items.forEach(function (it) {
+      var next = cur.concat([it]);
+      if (cur.length && (next.length > MAX_PER_TX || batchTx(owner, next, fee, blockhash).size > MAX_TX)) {
+        out.push(batchTx(owner, cur, fee, blockhash)); cur = [it];
+      } else cur = next;
+    });
+    if (cur.length) out.push(batchTx(owner, cur, fee, blockhash));
+    return out;
+  }
+
+  // parsed token account (jsonParsed, either program) -> grave item
+  function fromParsed(row, program) {
+    var info = row && row.account && row.account.data && row.account.data.parsed && row.account.data.parsed.info;
+    if (!info || !info.tokenAmount) return null;
+    var ext = info.extensions || [], withheld = false;
+    ext.forEach(function (e) { if (e && e.extension === "transferFeeAmount" && e.state && Number(e.state.withheldAmount) > 0) withheld = true; });
+    return {
+      pubkey: row.pubkey, program: program, mint: info.mint, owner: info.owner,
+      amount: String(info.tokenAmount.amount), decimals: Number(info.tokenAmount.decimals),
+      ui: info.tokenAmount.uiAmountString != null ? String(info.tokenAmount.uiAmountString) : String(info.tokenAmount.uiAmount),
+      lamports: Number(row.account.lamports) || 0, state: info.state, isNative: !!info.isNative,
+      closeAuthority: info.closeAuthority || null, withheld: withheld
+    };
+  }
+
+  // decide what each account is. kind: empty | dead | dust | alive | keep | unknown
+  function classify(it, market, owner, now, marketOk) {
+    var o = { kind: "dead", cause: "", why: "", selectable: true, checked: true, valueUsd: null };
+    if (it.isNative || KEEP[it.mint]) return Object.assign(o, { kind: "keep", cause: KEEP[it.mint] || "wrapped sol", selectable: false, checked: false });
+    if (it.state === "frozen") return Object.assign(o, { kind: "keep", cause: "frozen by its mint", selectable: false, checked: false });
+    if (it.closeAuthority && it.closeAuthority !== owner) return Object.assign(o, { kind: "keep", cause: "someone else can close it", selectable: false, checked: false });
+    if (it.withheld) return Object.assign(o, { kind: "keep", cause: "has withheld transfer fees", selectable: false, checked: false });
+    if (it.amount === "0") return Object.assign(o, { kind: "empty", cause: "already empty" });
+    if (it.decimals === 0) return Object.assign(o, { kind: "keep", cause: "nft or 0-decimal token", selectable: false, checked: false });
+    if (!marketOk) return Object.assign(o, { kind: "unknown", cause: "market data unavailable", selectable: false, checked: false });
+    if (!market) return Object.assign(o, { kind: "dead", cause: "no market anywhere" });
+    var value = market.priceUsd != null ? Number(it.ui) * market.priceUsd : null;
+    o.valueUsd = value;
+    var age = market.createdAt ? now - market.createdAt : Infinity;
+    if (market.txns24h === 0 && age > 864e5) return Object.assign(o, { kind: "dead", cause: "no trades in 24h" });
+    if (market.liquidityUsd != null && market.liquidityUsd < 50) return Object.assign(o, { kind: "dead", cause: "liquidity under $50" });
+    if (value != null && value < 1) return Object.assign(o, { kind: "dust", cause: "worth under $1", checked: false });
+    return Object.assign(o, { kind: "alive", cause: "still trading", selectable: false, checked: false });
+  }
+
+  function sigOf(txBytes) { return b58enc(txBytes.slice(1, 65)); }
+
+  var api = { B58: B58, SYS: SYS, CB: CB, TOK: TOK, T22: T22, WSOL: WSOL, KEEP: KEEP, MAX_TX: MAX_TX,
+    b58enc: b58enc, b58dec: b58dec, isAddr: isAddr, u64: u64, cu16: cu16, b64: b64, compile: compile,
+    ixLimit: ixLimit, ixPrice: ixPrice, ixBurn: ixBurn, ixClose: ixClose, ixTransfer: ixTransfer,
+    batchTx: batchTx, batches: batches, fromParsed: fromParsed, classify: classify, sigOf: sigOf };
+  if (typeof module !== "undefined" && module.exports) module.exports = api; else root.GC = api;
+})(this);
+
+</script>
+<script>
+// grave.fun app: scan, classify, draw the graveyard, bury through the wallet, share
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var SITE = "https://gravefun.vercel.app";
+  var CHAIN = "solana:mainnet";
+  var DUMMY_BH = "11111111111111111111111111111111";
+  var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var CFG = { feeWallet: null, feeBps: 0, graveMint: null };
+  var S = { owner: null, mode: null, items: [], scanned: false, busy: false, wallet: null, account: null, shown: {}, result: null, scanId: 0 };
+  var GROUPS = [
+    ["dead", "dead coins", "no market, no trades in 24h, or under $50 of liquidity"],
+    ["empty", "empty accounts", "nothing left inside, only the rent"],
+    ["dust", "dust that still trades", "worth under $1. unticked: tick only what you're sure about"],
+    ["alive", "alive, not buried", "still worth $1 or more, so it stays"],
+    ["keep", "kept out", "never buried"],
+    ["unknown", "couldn't check", "market data didn't load, so these stay"]
+  ];
+  var FLAVOR = ["gone, but not forgotten", "bought with conviction", "held to the very end", "the chart had other plans",
+    "diamond hands, flat line", "a good meme while it lasted", "rugged by time", "never paid rent, until now"];
+
+  function sol(l, d) { return (l / 1e9).toFixed(d == null ? 4 : d); }
+  function short(a) { return a ? a.slice(0, 4) + "…" + a.slice(-4) : ""; }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function hash(s) { var h = 2166136261; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+  function usd(v) { return v == null ? "" : v < 0.01 ? "<$0.01" : "$" + (v < 100 ? v.toFixed(2) : Math.round(v).toLocaleString("en-US")); }
+  function amt(s) { var n = Number(s); if (!isFinite(n)) return s; if (n >= 1e9) return (n / 1e9).toFixed(2) + "b"; if (n >= 1e6) return (n / 1e6).toFixed(2) + "m"; if (n >= 1e3) return (n / 1e3).toFixed(1) + "k"; return String(+n.toPrecision(4)); }
+  function err(msg) { $("err").textContent = msg || ""; }
+  function clock(d) { return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }).toLowerCase(); }
+
+  function rpc(method, params) {
+    return fetch("/api/rpc", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ method: method, params: params }) })
+      .then(function (r) { return r.json().catch(function () { return { error: "rpc " + r.status }; }); })
+      .then(function (j) {
+        if (j.error) throw new Error(typeof j.error === "string" ? j.error : (j.error.message || "rpc error"));
+        return j.result;
+      });
+  }
+
+  // ---------- scan ----------
+  function symbolOf(it) { if (GC.KEEP[it.mint] || it.isNative) return (GC.KEEP[it.mint] || "wrapped sol").replace("wrapped sol", "wSOL").toUpperCase().replace("WSOL", "wSOL"); return it.market && it.market.symbol ? it.market.symbol : (it.amount === "0" ? "empty" : "unlisted"); }
+  function scan(owner, mode) {
+    var id = ++S.scanId;
+    S.busy = true; S.owner = owner; S.mode = mode; S.items = []; S.scanned = false; S.result = null; S.shown = {};
+    err(""); $("result").classList.add("hidden"); $("review").classList.add("hidden"); $("log").innerHTML = "";
+    $("stLeft").textContent = "digging through " + short(owner) + "…";
+    $("signN").textContent = "digging…"; $("signV").textContent = "";
+    draw();
+    return Promise.all([GC.TOK, GC.T22].map(function (p) {
+      return rpc("getTokenAccountsByOwner", [owner, { programId: p }, { encoding: "jsonParsed", commitment: "confirmed" }]);
+    })).then(function (res) {
+      if (id !== S.scanId) return;
+      var items = [];
+      res.forEach(function (r, i) { ((r && r.value) || []).forEach(function (row) { var it = GC.fromParsed(row, [GC.TOK, GC.T22][i]); if (it) items.push(it); }); });
+      var mints = [];
+      items.forEach(function (it) { if (it.amount !== "0" && it.decimals > 0 && !GC.KEEP[it.mint] && !it.isNative && mints.indexOf(it.mint) < 0) mints.push(it.mint); });
+      var chunks = []; for (var i = 0; i < mints.length; i += 30) chunks.push(mints.slice(i, i + 30));
+      var markets = {}, ok = {}, stamp = null;
+      return Promise.all(chunks.map(function (c) {
+        return fetch("/api/tokens?mints=" + c.join(",")).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+          .then(function (j) { c.forEach(function (m) { ok[m] = true; markets[m] = j.tokens ? j.tokens[m] : null; }); stamp = j.fetchedAt; })
+          .catch(function () { c.forEach(function (m) { ok[m] = false; }); });
+      })).then(function () {
+        if (id !== S.scanId) return;
+        var now = Date.now();
+        items.forEach(function (it) {
+          it.market = markets[it.mint] || null;
+          var c = GC.classify(it, it.market, owner, now, ok[it.mint] !== false);
+          for (var k in c) it[k] = c[k];
+          it.sym = symbolOf(it);
+        });
+        var rank = { dead: 0, empty: 1, dust: 2, alive: 3, keep: 4, unknown: 5 };
+        items.sort(function (a, b) { return rank[a.kind] - rank[b.kind] || b.lamports - a.lamports || (a.sym < b.sym ? -1 : 1); });
+        S.items = items; S.scanned = true; S.busy = false;
+        S.marketsDown = mints.length && mints.some(function (m) { return ok[m] === false; });
+        S.marketStamp = stamp ? new Date(stamp) : null;
+        render();
+      });
+    }).catch(function (e) {
+      if (id !== S.scanId) return;
+      S.busy = false;
+      err("couldn't read the chain right now (" + e.message + "). try again in a minute.");
+      $("stLeft").textContent = "scan failed";
+      $("signN").textContent = "chain unreachable"; $("signV").textContent = "—";
+      draw();
+    });
+  }
+
+  function buryable() { return S.items.filter(function (it) { return it.selectable && !it.buried; }); }
+  function selected() { return S.items.filter(function (it) { return it.selectable && it.checked && !it.buried; }); }
+  function fee() { return CFG.feeWallet && CFG.feeBps ? { wallet: CFG.feeWallet, bps: CFG.feeBps } : null; }
+
+  // ---------- render list + sums ----------
+  function render() {
+    var locked = 0;
+    S.items.forEach(function (x) { if (!x.buried && (x.kind === "dead" || x.kind === "empty")) locked += x.lamports; });
+    var counts = {}; S.items.forEach(function (x) { var k = x.buried ? "buried" : x.kind; counts[k] = (counts[k] || 0) + 1; });
+    $("stLeft").textContent = S.items.length + " accounts · " + (counts.buried ? counts.buried + " buried · " : "") + (counts.dead || 0) + " dead · " + (counts.empty || 0) + " empty · " + sol(locked) + " sol locked";
+    $("stRight").textContent = S.marketsDown ? "market data unavailable right now: only empty accounts can be closed" :
+      (S.marketStamp ? "markets live from dexscreener · " + clock(S.marketStamp) : "rent read from chain");
+    var graves = S.items.filter(function (x) { return x.kind === "dead" || x.kind === "empty"; }).length;
+    if (S.result) { $("signN").textContent = S.result.n + " buried"; $("signV").textContent = "+" + sol(S.result.net) + " sol"; }
+    else { $("signN").textContent = graves + (graves === 1 ? " grave" : " graves"); $("signV").textContent = sol(locked) + " sol"; }
+    if (!S.items.length) {
+      err(""); $("review").classList.add("hidden");
+      $("stLeft").textContent = short(S.owner) + " has no token accounts. nothing to bury.";
+      draw(); return;
+    }
+    var html = "";
+    GROUPS.forEach(function (g) {
+      var rows = S.items.filter(function (x) { return x.kind === g[0]; });
+      if (!rows.length) return;
+      var sel = rows.filter(function (x) { return x.selectable && !x.buried; });
+      var all = sel.length && sel.every(function (x) { return x.checked; });
+      var lim = S.shown[g[0]] ? rows.length : 12;
+      html += '<div class="grp" data-g="' + g[0] + '"><label class="gh">' +
+        (sel.length ? '<input type="checkbox" data-grp="' + g[0] + '"' + (all ? " checked" : "") + ">" : "") +
+        "<span>" + esc(g[1]) + '</span><span class="c">' + rows.length + "</span></label>" +
+        '<div class="gd">' + esc(g[2]) + "</div>";
+      rows.slice(0, lim).forEach(function (x) {
+        var link = x.market && x.market.url ? x.market.url : "https://solscan.io/token/" + x.mint;
+        var why = x.buried ? "buried" : x.cause + (x.amount !== "0" ? " · held " + amt(x.ui) : "") + (x.valueUsd != null && x.kind !== "dead" ? " · " + usd(x.valueUsd) : "");
+        html += '<div class="row' + (x.selectable && !x.buried ? "" : " off") + (x.buried ? " done" : "") + '" data-k="' + x.pubkey + '">' +
+          (x.selectable && !x.buried ? '<input type="checkbox" data-acc="' + x.pubkey + '"' + (x.checked ? " checked" : "") + ' aria-label="bury ' + esc(x.sym) + '">' : "<span></span>") +
+          '<div class="t"><a href="' + esc(link) + '" target="_blank" rel="noopener">' + esc(x.sym) + '</a><span class="m">' + esc(short(x.mint)) + (x.program === GC.T22 ? " · token-2022" : "") + "</span></div>" +
+          '<div class="why">' + esc(why) + "</div>" +
+          '<div class="r">' + (x.buried ? "+" : "") + sol(x.lamports) + "</div></div>";
+      });
+      if (rows.length > lim) html += '<button class="more" type="button" data-more="' + g[0] + '">show all ' + rows.length + "</button>";
+      html += "</div>";
+    });
+    $("list").innerHTML = html;
+    $("review").classList.remove("hidden");
+    sums();
+    draw();
+  }
+
+  function sums() {
+    var sel = selected(), f = fee();
+    var bs = sel.length && S.owner ? GC.batches(S.owner, sel, f, DUMMY_BH) : [];
+    var rent = 0, fe = 0, net = 0;
+    bs.forEach(function (b) { rent += b.lamports; fe += b.fee; net += 5000 + b.priority; });
+    var you = rent - fe - net;
+    $("sCount").textContent = sel.length + (bs.length ? " in " + bs.length + (bs.length === 1 ? " tx" : " txs") : "");
+    $("sRent").textContent = sol(rent) + " sol";
+    $("sFeeL").textContent = f ? (CFG.feeBps / 100) + "% to $GRAVE" : "$GRAVE fee (off)";
+    $("sFee").textContent = (fe ? "−" : "") + sol(fe) + " sol";
+    $("sNet").textContent = (net ? "−" : "") + sol(net, 6) + " sol";
+    $("sYou").textContent = sol(Math.max(0, you)) + " sol";
+    var peek = S.mode === "peek";
+    var b = $("bury");
+    b.dataset.arm = "";
+    if (S.busy) { b.disabled = true; }
+    else if (peek) { b.disabled = false; b.textContent = S.account ? "switch to your wallet" : "connect wallet to bury"; }
+    else { b.disabled = !sel.length; b.textContent = sel.length ? "bury " + sel.length + (sel.length === 1 ? " coin" : " coins") : "tick something to bury"; }
+    $("dry").classList.toggle("hidden", !peek);
+    $("dry").disabled = S.busy || !sel.length;
+    $("sumTitle").textContent = peek ? "peeking at " + short(S.owner) : "bury the ticked coins";
+    $("sumNote").textContent = peek ? "Read-only. A dry run simulates every batch on chain with this wallet as signer, but nothing is sent."
+      : "Burning is permanent. Each batch is one transaction: if it fails, nothing in it was burned.";
+    S.plan = { bs: bs, rent: rent, fee: fe, net: net, you: you };
+  }
+
+  $("list").addEventListener("change", function (e) {
+    var t = e.target;
+    if (t.dataset.acc) { S.items.forEach(function (x) { if (x.pubkey === t.dataset.acc) x.checked = t.checked; }); }
+    if (t.dataset.grp) { S.items.forEach(function (x) { if (x.kind === t.dataset.grp && x.selectable && !x.buried) x.checked = t.checked; }); }
+    render();
+  });
+  $("list").addEventListener("click", function (e) {
+    var m = e.target.dataset && e.target.dataset.more;
+    if (m) { S.shown[m] = true; render(); }
+  });
+
+  // ---------- graveyard canvas ----------
+  var yard = $("yard"), ctx = yard.getContext("2d"), G = null, layout = [], flying = [], hoverIdx = -1, tick = 0, shownNet = 0;
+  function dims() {
+    var w = yard.parentElement.clientWidth < 640 ? 180 : 340;
+    var cols = w === 340 ? 10 : 5;
+    return { w: w, cols: cols, top: w === 340 ? 58 : 62, step: 17, sw: 28, sh: 26 };
+  }
+  function draw() {
+    var d = dims(), stones = S.items.filter(function (x) { return x.kind === "dead" || x.kind === "empty" || (x.kind === "dust" && x.checked) || x.buried; });
+    var cap = d.cols * 4, n = stones.length, show = n > cap ? stones.slice(0, cap - 1) : stones;
+    var rows = Math.max(1, Math.ceil((n > cap ? cap : n) / d.cols));
+    var H = d.top + d.sh + (rows - 1) * d.step + 10;
+    if (yard.width !== d.w || yard.height !== H) { yard.width = d.w; yard.height = H; }
+    var g = new PX.Grid(d.w, H);
+    var gx = Math.round(d.w / 2 - 10);
+    PX.backdrop(g, { horizon: d.top + 8, moonX: 24, moonY: 20, moonR: 10, seed: 21,
+      avoid: function (x, y) { return (x < 40 && y < 36) || (x > gx - 6 && x < gx + 26 && y < 36); } });
+    PX.ground(g, d.top + 4, 9);
+    layout = [];
+    var span = d.w / d.cols;
+    if (!S.scanned) {
+      (d.cols === 10 ? [1, 3, 6, 8] : [0, 2, 4]).forEach(function (c) {
+        PX.stone(g, Math.round(c * span + (span - d.sw) / 2), d.top + d.sh, d.sw, d.sh, "", "blank");
+      });
+    } else {
+      for (var r = 0; r < rows; r++) {
+        for (var c = 0; c < d.cols; c++) {
+          var i = r * d.cols + c;
+          if (i >= show.length + (n > cap ? 1 : 0)) continue;
+          var x0 = Math.min(d.w - d.sw - 1, Math.round(c * span + (span - d.sw) / 2 + (r % 2 ? span / 4 : 0)));
+          var yb = d.top + d.sh + r * d.step;
+          if (i === show.length) { PX.stone(g, x0, yb, d.sw, d.sh, "+" + (n - show.length), "on"); continue; }
+          var it = show[i];
+          PX.stone(g, x0, yb, d.sw, d.sh, it.market ? it.market.symbol : "?", it.buried ? "buried" : (it.checked ? "on" : "off"), i === hoverIdx);
+          layout.push({ x: x0, y: yb - d.sh, w: d.sw, h: d.sh, it: it, i: i });
+        }
+      }
+    }
+    var bob = REDUCED ? 0 : Math.sin(tick / 6) * 1.5;
+    PX.ghost(g, gx, 8 + Math.round(bob), tick / 3);
+    flying = flying.filter(function (f) { return tick - f.t0 <= f.dur; });
+    flying.forEach(function (f) {
+      var k = (tick - f.t0) / f.dur, e = k * k * (3 - 2 * k);
+      PX.coin(g, f.x + (gx + 7 - f.x) * e, f.y + (24 - f.y) * e - Math.sin(k * Math.PI) * 10, false);
+    });
+    if (S.result && !REDUCED && tick % 8 < 4) PX.sparkle(g, gx + 22, 12);
+    var img = ctx.createImageData(d.w, H);
+    g.rgba(img.data); ctx.putImageData(img, 0, 0);
+    G = d;
+  }
+  function loop() {
+    if (!document.hidden && !REDUCED) { tick++; draw(); }
+    setTimeout(function () { requestAnimationFrame(loop); }, 80);
+  }
+  function hitTest(ev) {
+    var r = yard.getBoundingClientRect(), x = (ev.clientX - r.left) / r.width * yard.width, y = (ev.clientY - r.top) / r.height * yard.height;
+    for (var k = layout.length - 1; k >= 0; k--) { var L = layout[k]; if (x >= L.x && x < L.x + L.w && y >= L.y && y < L.y + L.h) return L; }
+    return null;
+  }
+  function epitaph(it) {
+    var lines = ["<b>here lies " + esc(it.market ? "$" + it.market.symbol : short(it.mint)) + "</b>"];
+    lines.push(it.buried ? "buried · rent returned" : esc(it.cause));
+    if (it.amount !== "0") lines.push("you held " + esc(amt(it.ui)));
+    lines.push("<i>" + esc(FLAVOR[hash(it.mint) % FLAVOR.length]) + "</i>");
+    lines.push("rent: " + sol(it.lamports, 6) + " sol");
+    return lines.join("<br>");
+  }
+  function showTip(ev) {
+    var L = hitTest(ev), tip = $("tip");
+    var idx = L ? L.i : -1;
+    if (idx !== hoverIdx) { hoverIdx = idx; draw(); }
+    if (!L) { tip.classList.remove("on"); yard.style.cursor = "default"; return; }
+    yard.style.cursor = L.it.selectable && !L.it.buried ? "pointer" : "default";
+    var sr = $("stage").getBoundingClientRect();
+    tip.innerHTML = epitaph(L.it);
+    var tx = ev.clientX - sr.left + 14, ty = ev.clientY - sr.top + 14;
+    tip.style.left = Math.min(tx, sr.width - 260) + "px"; tip.style.top = Math.max(4, Math.min(ty, sr.height - 120)) + "px";
+    tip.classList.add("on");
+  }
+  yard.addEventListener("mousemove", showTip);
+  yard.addEventListener("mouseleave", function () { hoverIdx = -1; $("tip").classList.remove("on"); draw(); });
+  yard.addEventListener("click", function (ev) {
+    var L = hitTest(ev);
+    showTip(ev);
+    if (L && L.it.selectable && !L.it.buried && S.mode === "wallet" && !S.busy && ev.pointerType !== "touch") { L.it.checked = !L.it.checked; render(); }
+  });
+  window.addEventListener("resize", function () { draw(); });
+
+  // ---------- wallets (wallet standard) ----------
+  var wallets = [];
+  function okWallet(w) {
+    return w && w.features && w.features["standard:connect"] && (w.features["solana:signTransaction"] || w.features["solana:signAndSendTransaction"]) &&
+      (w.chains || []).some(function (c) { return c.indexOf("solana:") === 0; });
+  }
+  var walletApi = { register: function () {
+    for (var i = 0; i < arguments.length; i++) if (okWallet(arguments[i]) && wallets.indexOf(arguments[i]) < 0) wallets.push(arguments[i]);
+    return function () {};
+  } };
+  window.addEventListener("wallet-standard:register-wallet", function (e) { try { e.detail(walletApi); } catch (x) {} });
+  try { window.dispatchEvent(new CustomEvent("wallet-standard:app-ready", { detail: walletApi })); } catch (x) {}
+
+  function pickWallet() {
+    if (S.account) { // already connected: rescan it
+      return scan(S.account.address, "wallet");
+    }
+    if (wallets.length === 1) return connect(wallets[0]);
+    var box = $("wl"); box.innerHTML = "";
+    wallets.forEach(function (w, i) {
+      var b = document.createElement("button"); b.type = "button";
+      b.innerHTML = (w.icon ? '<img alt="" src="' + esc(w.icon) + '">' : "") + "<span>" + esc(w.name) + "</span>";
+      b.addEventListener("click", function () { $("wdlg").close(); connect(wallets[i]); });
+      box.appendChild(b);
+    });
+    $("wnone").classList.toggle("hidden", wallets.length > 0);
+    $("wdlg").showModal();
+  }
+  function connect(w) {
+    err("");
+    return w.features["standard:connect"].connect().then(function (out) {
+      var accs = (out && out.accounts) || w.accounts || [];
+      var acc = accs.filter(function (a) { return !a.chains || a.chains.some(function (c) { return c.indexOf("solana:") === 0; }); })[0];
+      if (!acc) throw new Error("no solana account");
+      S.wallet = w; S.account = acc;
+      setConnected();
+      if (w.features["standard:events"]) w.features["standard:events"].on("change", function (p) {
+        if (p && p.accounts) {
+          var a = p.accounts[0];
+          if (!a) { S.wallet = null; S.account = null; setConnected(); return; }
+          if (!S.account || a.address !== S.account.address) { S.account = a; setConnected(); scan(a.address, "wallet"); }
+        }
+      });
+      history.replaceState(null, "", location.pathname);
+      return scan(acc.address, "wallet");
+    }).catch(function (e) { err("wallet didn't connect: " + (e && e.message ? e.message : "declined")); });
+  }
+  function setConnected() {
+    var a = S.account;
+    $("navConnect").textContent = a ? short(a.address) : "connect";
+    $("connect").textContent = a ? "dig my graveyard" : "connect wallet";
+  }
+  $("navConnect").addEventListener("click", pickWallet);
+  $("connect").addEventListener("click", pickWallet);
+
+  $("peek").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var v = $("peekIn").value.trim();
+    if (!GC.isAddr(v)) { err("that's not a solana wallet address."); return; }
+    history.replaceState(null, "", "?w=" + v);
+    scan(v, S.account && S.account.address === v ? "wallet" : "peek");
+  });
+
+  // ---------- simulate / bury ----------
+  function log(html, cls) { var d = document.createElement("div"); if (cls) d.className = cls; d.innerHTML = html; $("log").appendChild(d); $("log").scrollTop = 1e9; }
+  function simErr(v) {
+    if (!v) return "no answer";
+    if (!v.err) return null;
+    var logs = (v.logs || []).filter(function (l) { return /failed|error/i.test(l); });
+    return (logs[logs.length - 1] || JSON.stringify(v.err)).replace(/^Program \w+ /, "").slice(0, 120);
+  }
+  function simulate(bytes) {
+    return rpc("simulateTransaction", [GC.b64(bytes), { encoding: "base64", sigVerify: false, replaceRecentBlockhash: true, commitment: "confirmed" }])
+      .then(function (r) { return simErr(r && r.value); });
+  }
+  // simulate every batch; split a failing batch and drop the accounts that fail alone
+  function prepare(owner, items, bh) {
+    var good = [], dropped = [];
+    var first = GC.batches(owner, items, fee(), bh);
+    return first.reduce(function (p, b, k) {
+      return p.then(function () {
+        log("simulating batch " + (k + 1) + "/" + first.length + "…");
+        return simulate(b.bytes).then(function (e) {
+          if (!e) { good = good.concat(b.items); return; }
+          if (b.items.length === 1) { dropped.push([b.items[0], e]); return; }
+          return b.items.reduce(function (q, it) {
+            return q.then(function () { return simulate(GC.batchTx(owner, [it], fee(), bh).bytes).then(function (e2) { if (e2) dropped.push([it, e2]); else good.push(it); }); });
+          }, Promise.resolve());
+        });
+      });
+    }, Promise.resolve()).then(function () {
+      dropped.forEach(function (d) { d[0].checked = false; d[0].selectable = false; d[0].kind = "keep"; d[0].cause = "won't close: " + d[1]; log(esc(d[0].sym) + ": skipped, " + esc(d[1]), "bad"); });
+      return { bs: GC.batches(owner, good, fee(), bh), dropped: dropped };
+    });
+  }
+
+  function dryRun() {
+    var sel = selected(); if (!sel.length) return;
+    S.busy = true; sums(); $("log").innerHTML = "";
+    rpc("getLatestBlockhash", [{ commitment: "confirmed" }]).then(function (r) {
+      return prepare(S.owner, sel, r.value.blockhash);
+    }).then(function (p) {
+      var rent = 0, n = 0; p.bs.forEach(function (b) { rent += b.lamports; n += b.items.length; });
+      log("dry run: " + p.bs.length + (p.bs.length === 1 ? " batch" : " batches") + " · " + n + " coins simulate cleanly · " + sol(rent) + " sol of rent", "ok");
+    }).catch(function (e) { log("dry run failed: " + esc(e.message), "bad"); })
+      .then(function () { S.busy = false; render(); });
+  }
+
+  function signAll(bs) {
+    var w = S.wallet, acc = S.account, f = w.features;
+    var st = f["solana:signTransaction"];
+    if (st && (!st.supportedTransactionVersions || st.supportedTransactionVersions.indexOf("legacy") >= 0)) {
+      return st.signTransaction.apply(st, bs.map(function (b) { return { account: acc, chain: CHAIN, transaction: b.bytes }; }))
+        .then(function (outs) {
+          return bs.reduce(function (p, b, k) {
+            return p.then(function (sigs) {
+              var signed = outs[k].signedTransaction;
+              return rpc("sendTransaction", [GC.b64(signed), { encoding: "base64", skipPreflight: true, maxRetries: 5 }])
+                .then(function (sig) { b.sig = sig || GC.sigOf(signed); return sigs.concat([b.sig]); })
+                .catch(function (e) { b.fail = e.message; log("batch " + (k + 1) + " not sent: " + esc(e.message) + ". nothing in it was burned.", "bad"); return sigs; });
+            });
+          }, Promise.resolve([]));
+        });
+    }
+    var sas = f["solana:signAndSendTransaction"];
+    return bs.reduce(function (p, b, k) {
+      return p.then(function (sigs) {
+        return sas.signAndSendTransaction({ account: acc, chain: CHAIN, transaction: b.bytes, options: { skipPreflight: true, maxRetries: 5 } })
+          .then(function (out) { b.sig = GC.b58enc(out[0].signature); return sigs.concat([b.sig]); });
+      });
+    }, Promise.resolve([]));
+  }
+
+  function confirmAll(bs) {
+    var pending = bs.filter(function (b) { return b.sig && !b.fail; }), start = Date.now();
+    return new Promise(function (done) {
+      (function poll() {
+        if (!pending.length) return done();
+        rpc("getSignatureStatuses", [pending.map(function (b) { return b.sig; }), { searchTransactionHistory: false }]).then(function (r) {
+          (r && r.value || []).forEach(function (s, k) {
+            var b = pending[k];
+            if (!s || b.state) return;
+            if (s.err) { b.state = "failed"; b.fail = JSON.stringify(s.err); }
+            else if (s.confirmationStatus === "confirmed" || s.confirmationStatus === "finalized") b.state = "ok";
+            if (b.state) landed(b);
+          });
+        }).catch(function () {}).then(function () {
+          pending = pending.filter(function (b) { return !b.state; });
+          if (pending.length && Date.now() - start > 75000) {
+            pending.forEach(function (b) { b.state = "timeout"; log('batch still unconfirmed: <a href="https://solscan.io/tx/' + b.sig + '" target="_blank" rel="noopener">check on solscan</a>. reload in a minute to see it.', "bad"); });
+            return done();
+          }
+          setTimeout(poll, 1500);
+        });
+      })();
+    });
+  }
+
+  function landed(b) {
+    var link = ' <a href="https://solscan.io/tx/' + b.sig + '" target="_blank" rel="noopener">tx</a>';
+    if (b.state === "ok") {
+      log("buried " + b.items.length + (b.items.length === 1 ? " coin" : " coins") + " · +" + sol(b.lamports - b.fee) + " sol" + link, "ok");
+      b.items.forEach(function (it, k) {
+        it.buried = true; it.checked = false;
+        var L = layout.filter(function (l) { return l.it === it; })[0];
+        if (L) flying.push({ x: L.x + 11, y: L.y + 4, t0: tick + k * 2, dur: REDUCED ? 0 : 14 });
+      });
+      S.done = S.done || { n: 0, rent: 0, fee: 0, net: 0, syms: [] };
+      S.done.n += b.items.length; S.done.rent += b.lamports; S.done.fee += b.fee; S.done.net += b.lamports - b.fee - 5000 - b.priority;
+      b.items.forEach(function (it) { if (it.market && it.market.symbol) S.done.syms.push(it.market.symbol); });
+    } else log("batch failed: " + esc(b.fail) + ". nothing in it was burned." + link, "bad");
+    render();
+  }
+
+  function bury() {
+    var btn = $("bury");
+    if (S.mode === "peek") { pickWallet(); return; }
+    var sel = selected(); if (!sel.length || S.busy || !S.account) return;
+    if (btn.dataset.arm !== "1") { // two-step: first click arms
+      btn.dataset.arm = "1"; btn.textContent = "burning is permanent. click again";
+      setTimeout(function () { if (btn.dataset.arm === "1") sums(); }, 5000);
+      return;
+    }
+    S.busy = true; S.done = null; sums(); $("log").innerHTML = "";
+    var owner = S.account.address;
+    rpc("getLatestBlockhash", [{ commitment: "confirmed" }]).then(function (r) {
+      return prepare(owner, sel, r.value.blockhash);
+    }).then(function (p) {
+      if (!p.bs.length) throw new Error("nothing left that can be closed");
+      log("asking your wallet to sign " + p.bs.length + (p.bs.length === 1 ? " transaction" : " transactions") + "…");
+      return signAll(p.bs).then(function () { return confirmAll(p.bs); });
+    }).catch(function (e) {
+      var m = e && e.message ? e.message : String(e);
+      log((/reject|declin|denied|cancel/i.test(m) ? "you declined in the wallet" : "stopped: " + esc(m)) + ". nothing unsigned was burned.", "bad");
+    }).then(function () {
+      S.busy = false;
+      if (S.done && S.done.n) { S.result = S.done; showResult(); }
+      render();
+    });
+  }
+  $("bury").addEventListener("click", bury);
+  $("dry").addEventListener("click", dryRun);
+
+  // ---------- share card ----------
+  function shareGrid(r) {
+    var g = new PX.Grid(240, 126), syms = r.syms.slice(0, 4);
+    PX.card(g, [
+      { segs: [["i buried", "ink"]], sc: 2 },
+      { segs: [[String(r.n), "c"], [r.n === 1 ? " coin" : " coins", "ink"]], sc: 2 },
+      { segs: [["+" + sol(r.net) + " sol back", "ink"]], sc: 2, gap: 12 },
+      { segs: [["grave.fun", "c"]], sc: 1 }
+    ], { top: 14, hero: syms[0] || "", stones: [[syms[0] || "", syms[0] ? "on" : "blank"], [syms[1] || "", syms[1] ? "buried" : "blank"], [syms[2] || "", syms[2] ? "buried" : "blank"]] });
+    return g;
+  }
+  function showResult() {
+    var r = S.result, c = $("share"), g = shareGrid(r);
+    var img = c.getContext("2d").createImageData(240, 126); g.rgba(img.data); c.getContext("2d").putImageData(img, 0, 0);
+    $("resH").innerHTML = "i buried <em>" + r.n + (r.n === 1 ? " coin" : " coins") + "</em>";
+    $("resP").textContent = "+" + sol(r.net) + " sol back to " + short(S.owner) + (r.fee ? " · " + sol(r.fee) + " sol to $GRAVE" : "") + ". what's left of the graveyard is above.";
+    var text = "i buried " + r.n + " dead " + (r.n === 1 ? "coin" : "coins") + " and got " + sol(r.net) + " sol back. bury yours:";
+    $("post").href = "https://x.com/intent/post?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(SITE);
+    $("result").classList.remove("hidden");
+    $("result").scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "nearest" });
+  }
+  $("dl").addEventListener("click", function () {
+    var src = $("share"), big = document.createElement("canvas"); big.width = 1200; big.height = 630;
+    var x = big.getContext("2d"); x.imageSmoothingEnabled = false; x.drawImage(src, 0, 0, 1200, 630);
+    big.toBlob(function (b) { var a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "graveyard.png"; document.body.appendChild(a); a.click(); a.remove(); });
+  });
+
+  // ---------- config, mark, boot ----------
+  function markDraw() {
+    var c = $("mark"), g = new PX.Grid(20, 25); g.px.fill(-1); PX.ghost(g, 0, 0, 0);
+    var img = c.getContext("2d").createImageData(20, 25); g.rgba(img.data); c.getContext("2d").putImageData(img, 0, 0);
+  }
+  fetch("/api/config").then(function (r) { return r.json(); }).then(function (j) { CFG = j || CFG; }).catch(function () {}).then(function () {
+    if (CFG.graveMint) {
+      $("graveCa").textContent = short(CFG.graveMint);
+      $("navGrave").addEventListener("click", function () {
+        if (navigator.clipboard) navigator.clipboard.writeText(CFG.graveMint).then(function () { $("graveCa").textContent = "copied"; setTimeout(function () { $("graveCa").textContent = short(CFG.graveMint); }, 1400); });
+      });
+    }
+    $("feeRule").textContent = fee() ? (CFG.feeBps / 100) + "% of the rent you reclaim goes to the $GRAVE wallet " + short(CFG.feeWallet) + ", shown before you sign." : "The 15% $GRAVE fee is off until $GRAVE launches.";
+    if (S.scanned) sums();
+  });
+  markDraw();
+  draw();
+  loop();
+  var q = new URLSearchParams(location.search).get("w");
+  if (q && GC.isAddr(q)) { $("peekIn").value = q; scan(q, "peek"); }
+  window.__grave = { S: S, CFG: CFG, wallets: wallets, layout: function () { return layout; } };
+})();
+
+</script>
+</body>
+</html>
