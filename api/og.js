@@ -29,7 +29,7 @@ function ogGrid() {
     { segs: [["get ", "ink"], ["sol", "c"], [" back.", "ink"]], sc: 2, gap: 12 },
     { segs: [["burn it. close it.", "lav"]], sc: 1, gap: 4 },
     { segs: [["take the rent.", "lav"]], sc: 1, gap: 10 },
-    { segs: [["grave.fun", "c"]], sc: 1 }
+    { segs: [["grave", "c"]], sc: 1 }
   ], { top: 16, hero: "", bob: 0 });
   return g;
 }

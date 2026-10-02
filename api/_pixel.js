@@ -1,4 +1,4 @@
-// grave.fun pixel engine: one source for the page canvas, the share card and /api/og
+// grave pixel engine: one source for the page canvas, the share card and /api/og
 // (inlined into index.html by build.py; required by api/og.js in node)
 (function (root) {
   var PAL = {
